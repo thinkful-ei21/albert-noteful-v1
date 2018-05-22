@@ -5,7 +5,11 @@ const app = express();
 
 const { PORT } = require('./config.js');
 const { logger } = require('./middleware/logger.js');
+
+// Simple In-Memory Database
 const data = require('./db/notes');
+const simDB = require('./db/simDB');
+const notes = simDB.initialize(data);
 
 // static server here
 app.use(express.static('public'));
@@ -20,18 +24,29 @@ app.get('/boom', (req, res, next) => {
 
 // GET function to support search query
 // http://127.0.0.1:8080/api/notes?searchTerm=cats this is an example query
-app.get('/api/notes/', (req, res) => {
-  const searchTerm = req.query.searchTerm;
-  if(searchTerm) {
-    const foundData = data.filter(item => item.title.includes(searchTerm));
-    res.json(foundData);
-  } else {
-    res.json(data);
-  }
+// app.get('/api/notes/', (req, res) => {
+//   const searchTerm = req.query.searchTerm;
+//   if(searchTerm) {
+//     const foundData = data.filter(item => item.title.includes(searchTerm));
+//     res.json(foundData);
+//   } else {
+//     res.json(data);
+//   }
+// this is the short-hand method of the above
+// const {searchTerm} = req.query;
+// res.json(searchTerm ? data.filter(item => item.title.includes(searchTerm)) : data);
+// });
 
-  // this is the short-hand method of the above
-  // const {searchTerm} = req.query;
-  // res.json(searchTerm ? data.filter(item => item.title.includes(searchTerm)) : data);
+// GET Notes with search, replaces the above GET endpoint
+app.get('/api/notes', (req, res, next) => {
+  const { searchTerm } = req.query;
+
+  notes.filter(searchTerm, (err, list) => {
+    if (err) {
+      return next(err); // goes to error handler
+    }
+    res.json(list); // responds with filtered array
+  });
 });
 
 // GET /api/notes/:id returns a specific note based on the ID provided.
