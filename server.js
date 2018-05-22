@@ -3,10 +3,17 @@
 const express = require('express');
 const app = express();
 
+const { PORT } = require('./config.js');
+
+const { logger } = require('./middleware/logger.js');
+
 const data = require('./db/notes');
 
 // ADD STATIC SERVER HERE
 app.use(express.static('public'));
+
+// use our own custom logger here
+app.use(logger);
 
 // GET function to support search query
 // http://127.0.0.1:8080/api/notes?searchTerm=cats this is an example query
@@ -31,7 +38,7 @@ app.get('/api/notes/:id', (req, res) => {
   res.json(foundId);
 });
 
-app.listen(8080, function () {
+app.listen(PORT, function () {
   console.info(`Server listening on ${this.address().port}`);
 }).on('error', err => {
   console.error(err);
