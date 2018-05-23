@@ -64,7 +64,7 @@ router.put('/api/notes/:id', (req, res, next) => {
   });
 });
 
-// Post (insert) an item
+// POST (insert) an item
 router.post('/api/notes', (req, res, next) => {
   const { title, content } = req.body;
 
@@ -85,6 +85,18 @@ router.post('/api/notes', (req, res, next) => {
     } else {
       next();
     }
+  });
+});
+
+// DELETE (delete notes by ID)
+router.delete('/api/notes/:id', (req, res, next) => {
+  const id = req.params.id;
+
+  notes.delete(id, (err) => {
+    if (err) {
+      return next(err);
+    }
+    res.sendStatus(204);
   });
 });
 
