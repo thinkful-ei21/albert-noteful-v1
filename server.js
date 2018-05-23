@@ -51,10 +51,22 @@ app.get('/api/notes', (req, res, next) => {
 
 // GET /api/notes/:id returns a specific note based on the ID provided.
 // http://127.0.0.1:8080/api/1005 this is an example of id search endpoint
-app.get('/api/notes/:id', (req, res) => {
-  const foundId = data.find(item => item.id === Number(req.params.id));
-  res.json(foundId);
+// app.get('/api/notes/:id', (req, res) => {
+//   const foundId = data.find(item => item.id === Number(req.params.id));
+//   res.json(foundId);
+// });
+
+app.get('/api/notes/:id', (req, res, next) => {
+  const id = req.params.id;
+
+  notes.find(id, (err, item) => {
+    if (err) {
+      return next(err); // goes to error handler
+    }
+    res.json(item); // responds with item of matching id
+  });
 });
+
 
 // 404 error handler function below
 app.use(function (req, res, next) {
