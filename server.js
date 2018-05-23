@@ -1,20 +1,27 @@
 'use strict';
 
 const express = require('express');
-const app = express();
+const morgan = require('morgan');
+
 
 const { PORT } = require('./config.js');
-const { logger } = require('./middleware/logger.js');
-// this would also do for logger inline
-// app.use(require('./middleware/logger.js'));
 
 // Simple In-Memory Database
 const data = require('./db/notes.json');
 const simDB = require('./db/simDB.js');
+
+const app = express();
+const logger = morgan();
 const notes = simDB.initialize(data);
 
 // this logs all incoming requests
 app.use(logger);
+// this was the old custom logger
+// const logger = function (req, res, next) {
+//   const now = new Date();
+//   console.log(`${now.toLocaleDateString()} ${now.toLocaleTimeString()} ${req.method} ${req.url}`);
+//   next();
+// };
 
 // static server here
 app.use(express.static('public'));
