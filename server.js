@@ -11,11 +11,14 @@ const data = require('./db/notes');
 const simDB = require('./db/simDB');
 const notes = simDB.initialize(data);
 
+// this logs all incoming requests
+app.use(logger);
+
 // static server here
 app.use(express.static('public'));
 
-// use our own custom logger here
-app.use(logger);
+// parses incoming req's with JSON bodies and adds them to req.body
+app.use(express.json());
 
 // temp code just for the sake of generating an error
 app.get('/boom', (req, res, next) => {
@@ -64,6 +67,32 @@ app.get('/api/notes/:id', (req, res, next) => {
       return next(err); // goes to error handler
     }
     res.json(item); // responds with item of matching id
+  });
+});
+
+// PUT (update notes by ID)
+app.put('/api/notes/:id', (req, res, next) => {
+  const id = req.params.id;
+
+  /***** Never trust users - validate input *****/
+  const updateObj = {};
+  const updateFields = ['title', 'content'];
+
+  updateFields.forEach(field => {
+    if (field in req.body) {
+      updateObj[field] = req.body[field];
+    }
+  });
+
+  notes.update(id, updateObj, (err, item) => {
+    if (err) {
+      return next(err);
+    }
+    if (item) {
+      res.json(item);
+    } else {
+      next();
+    }
   });
 });
 
