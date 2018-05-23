@@ -3,25 +3,20 @@
 const express = require('express');
 const morgan = require('morgan');
 
-
-const { PORT } = require('./config.js');
-
-// Simple In-Memory Database
-const data = require('./db/notes.json');
-const simDB = require('./db/simDB.js');
+const {PORT} = require('./config.js');
+const notesRouter = require('./routes/notes-router.js');
 
 const app = express();
-const logger = morgan();
-const notes = simDB.initialize(data);
 
 // this logs all incoming requests
-app.use(logger);
-// this was the old custom logger
+app.use(morgan('dev'));
+// this was the old custom logger middleware
 // const logger = function (req, res, next) {
 //   const now = new Date();
 //   console.log(`${now.toLocaleDateString()} ${now.toLocaleTimeString()} ${req.method} ${req.url}`);
 //   next();
 // };
+//app.use(logger);
 
 // static server here
 app.use(express.static('public'));
@@ -29,82 +24,8 @@ app.use(express.static('public'));
 // parses incoming req's with JSON bodies and adds them to req.body
 app.use(express.json());
 
-// temp code just for the sake of generating an error
-app.get('/boom', (req, res, next) => {
-  throw new Error('Boom!!');
-});
-
-// GET function to support search query
-// http://127.0.0.1:8080/api/notes?searchTerm=cats this is an example query
-// app.get('/api/notes/', (req, res) => {
-//   const searchTerm = req.query.searchTerm;
-//   if(searchTerm) {
-//     const foundData = data.filter(item => item.title.includes(searchTerm));
-//     res.json(foundData);
-//   } else {
-//     res.json(data);
-//   }
-// this is the short-hand method of the above
-// const {searchTerm} = req.query;
-// res.json(searchTerm ? data.filter(item => item.title.includes(searchTerm)) : data);
-// });
-
-// GET Notes with search, replaces the above GET endpoint
-app.get('/api/notes', (req, res, next) => {
-  const { searchTerm } = req.query;
-
-  notes.filter(searchTerm, (err, list) => {
-    if (err) {
-      return next(err); // goes to error handler
-    }
-    res.json(list); // responds with filtered array
-  });
-});
-
-// GET /api/notes/:id returns a specific note based on the ID provided.
-// http://127.0.0.1:8080/api/1005 this is an example of id search endpoint
-// app.get('/api/notes/:id', (req, res) => {
-//   const foundId = data.find(item => item.id === Number(req.params.id));
-//   res.json(foundId);
-// });
-
-app.get('/api/notes/:id', (req, res, next) => {
-  const id = req.params.id;
-
-  notes.find(id, (err, item) => {
-    if (err) {
-      return next(err); // goes to error handler
-    }
-    res.json(item); // responds with item of matching id
-  });
-});
-
-// PUT (update notes by ID)
-app.put('/api/notes/:id', (req, res, next) => {
-  const id = req.params.id;
-
-  /***** Never trust users - validate input *****/
-  const updateObj = {};
-  const updateFields = ['title', 'content'];
-
-  updateFields.forEach(field => {
-    if (field in req.body) {
-      updateObj[field] = req.body[field];
-    }
-  });
-
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      next();
-    }
-  });
-});
-
+// transfers all requests to notesRouter
+app.use(notesRouter);
 
 // 404 error handler function below
 app.use(function (req, res, next) {
