@@ -5,10 +5,12 @@ const app = express();
 
 const { PORT } = require('./config.js');
 const { logger } = require('./middleware/logger.js');
+// this would also do for logger inline
+// app.use(require('./middleware/logger.js'));
 
 // Simple In-Memory Database
-const data = require('./db/notes');
-const simDB = require('./db/simDB');
+const data = require('./db/notes.json');
+const simDB = require('./db/simDB.js');
 const notes = simDB.initialize(data);
 
 // this logs all incoming requests
@@ -101,12 +103,15 @@ app.put('/api/notes/:id', (req, res, next) => {
 app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
-  res.status(404).json({ message: 'Not Found' });
+  next(err);
+  // this is redundant as we have another error handler that responds with err.message in the bottom
+  // res.status(404).json({ message: 'Not Found' });
 });
 
 // 500 error handler function below
 app.use(function (err, req, res, next) {
-  res.status(err.status || 500);
+  res.status(err.status || 500); // if anything is assigned to err.status (such as 400), it will use that; otherwise it will use 500
+  // instead of returning the entire error object for security purposes, we just return a json response with particular keys of the error object
   res.json({
     message: err.message,
     error: err
