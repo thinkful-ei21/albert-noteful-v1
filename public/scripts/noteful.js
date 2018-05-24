@@ -92,8 +92,8 @@ const noteful = (function () {
         api.update(store.currentNote.id, noteObj)
           .then(response => {
             store.currentNote = response;
+            return api.search(store.currentSearchTerm);
           })
-          .then(() => api.search(store.currentSearchTerm))
           .then(response => {
             store.notes = response;
             render();
@@ -116,8 +116,8 @@ const noteful = (function () {
         api.create(noteObj)
           .then(response => {
             store.currentNote = response;
+            return api.search(store.currentSearchTerm);
           })
-          .then(() => api.search(store.currentSearchTerm))
           .then(response => {
             store.notes = response;
             render();
