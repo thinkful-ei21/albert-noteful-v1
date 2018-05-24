@@ -30,12 +30,16 @@ router.get('/api/notes', (req, res, next) => {
 router.get('/api/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
-  notes.find(id, (err, item) => {
-    if (err) {
-      return next(err); // goes to error handler
-    }
-    res.json(item); // responds with item of matching id
-  });
+  notes.find(id)
+    .then(item => res.json(item))
+    .catch(err => next(err));
+
+  // notes.find(id, (err, item) => {
+  //   if (err) {
+  //     return next(err); // goes to error handler
+  //   }
+  //   res.json(item); // responds with item of matching id
+  // });
 });
 
 // PUT (update notes by ID)
@@ -52,16 +56,20 @@ router.put('/api/notes/:id', (req, res, next) => {
     }
   });
 
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      next();
-    }
-  });
+  notes.update(id, updateObj)
+    .then(item => res.json(item))
+    .catch(err => next(err));
+
+  // notes.update(id, updateObj, (err, item) => {
+  //   if (err) {
+  //     return next(err);
+  //   }
+  //   if (item) {
+  //     res.json(item);
+  //   } else {
+  //     next();
+  //   }
+  // });
 });
 
 // POST (insert) an item
@@ -76,28 +84,36 @@ router.post('/api/notes', (req, res, next) => {
     return next(err);
   }
 
-  notes.create(newItem, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item);
-    } else {
-      next();
-    }
-  });
+  notes.create(newItem)
+    .then(item => res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item))
+    .catch(err => next(err));
+
+  // notes.create(newItem, (err, item) => {
+  //   if (err) {
+  //     return next(err);
+  //   }
+  //   if (item) {
+  //     res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item);
+  //   } else {
+  //     next();
+  //   }
+  // });
 });
 
 // DELETE (delete notes by ID)
 router.delete('/api/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
-  notes.delete(id, (err) => {
-    if (err) {
-      return next(err);
-    }
-    res.sendStatus(204);
-  });
+  notes.delete(id)
+    .then(res.sendStatus(204))
+    .catch(err => next(err));
+
+  // notes.delete(id, (err) => {
+  //   if (err) {
+  //     return next(err);
+  //   }
+  //   res.sendStatus(204);
+  // });
 });
 
 module.exports = router;
