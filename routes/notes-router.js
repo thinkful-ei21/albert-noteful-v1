@@ -18,12 +18,15 @@ router.get('/boom', (req, res, next) => {
 router.get('/api/notes', (req, res, next) => {
   const {searchTerm} = req.query;
 
-  notes.filter(searchTerm, (err, list) => {
-    if (err) {
-      return next(err); // goes to error handler
-    }
-    res.json(list); // responds with filtered array
-  });
+  notes.filter(searchTerm)
+    .then(list => res.json(list))
+    .catch(err => next(err));
+  // notes.filter(searchTerm, (err, list) => {
+  //   if (err) {
+  //     return next(err); // goes to error handler
+  //   }
+  //   res.json(list); // responds with filtered array
+  // });
 });
 
 // GET /api/notes/:id returns a specific note based on the ID provided.
@@ -31,14 +34,17 @@ router.get('/api/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
   notes.find(id)
-    .then(item => res.json(item))
+    .then(item => item ? res.json(item) : next())
     .catch(err => next(err));
-
   // notes.find(id, (err, item) => {
   //   if (err) {
   //     return next(err); // goes to error handler
   //   }
-  //   res.json(item); // responds with item of matching id
+  //   if (item) {
+  //     res.json(item); // responds with item of matching id
+  //   } else {
+  //     next();
+  //   }
   // });
 });
 
@@ -57,9 +63,8 @@ router.put('/api/notes/:id', (req, res, next) => {
   });
 
   notes.update(id, updateObj)
-    .then(item => res.json(item))
+    .then(item => item ? res.json(item) : next())
     .catch(err => next(err));
-
   // notes.update(id, updateObj, (err, item) => {
   //   if (err) {
   //     return next(err);
@@ -87,7 +92,6 @@ router.post('/api/notes', (req, res, next) => {
   notes.create(newItem)
     .then(item => res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item))
     .catch(err => next(err));
-
   // notes.create(newItem, (err, item) => {
   //   if (err) {
   //     return next(err);
@@ -107,7 +111,6 @@ router.delete('/api/notes/:id', (req, res, next) => {
   notes.delete(id)
     .then(res.sendStatus(204))
     .catch(err => next(err));
-
   // notes.delete(id, (err) => {
   //   if (err) {
   //     return next(err);
