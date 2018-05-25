@@ -14,7 +14,7 @@ router.get('/boom', (req, res, next) => {
   throw new Error('Boom!!');
 });
 
-// GET Notes with search, replaces the above GET endpoint
+// GET Notes with search
 router.get('/api/notes', (req, res, next) => {
   const {searchTerm} = req.query;
 
