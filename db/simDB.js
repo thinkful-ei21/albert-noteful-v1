@@ -24,7 +24,7 @@ const simDB = {
         this.data.push(newItem);
         callback(null, newItem);
       } catch (err) {
-        callback(err);
+        callback(err, null);
       }
     }, DELAY);
   },
@@ -35,7 +35,7 @@ const simDB = {
         let list = term ? this.data.filter(item => item.title.includes(term)) : this.data;
         callback(null, list);
       } catch (err) {
-        callback(err);
+        callback(err, null);
       }
     }, DELAY);
   },
@@ -47,7 +47,7 @@ const simDB = {
         let item = this.data.find(item => item.id === id);
         callback(null, item);
       } catch (err) {
-        callback(err);
+        callback(err, null);
       }
     }, DELAY);
   },
@@ -63,7 +63,7 @@ const simDB = {
         Object.assign(item, updateItem);
         callback(null, item);
       } catch (err) {
-        callback(err);
+        callback(err, null);
       }
     }, DELAY);
   },
@@ -80,7 +80,7 @@ const simDB = {
           return callback(null, len);
         }
       } catch (err) {
-        callback(err);
+        callback(err, null);
       }
     }, DELAY);
   }
